@@ -1,0 +1,2 @@
+# news-aggregator-python
+Dự án tập trung xây dựng một hệ thống hoàn chỉnh nhằm thu thập tin tức tiếng Việt từ các nguồn báo hợp lệ, sau đó tự động xử lý và làm giàu dữ liệu. Quy trình xử lý bao gồm các bước: làm sạch văn bản, loại bỏ bài viết trùng lặp, phân loại nội dung vào 8 chuyên mục chung bằng Machine Learning, và tạo một đoạn tóm tắt ngắn (3-5 câu).
