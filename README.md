@@ -5,7 +5,7 @@ thành viên nhóm:
 Lê Minh Nhựt
 Đặng Phước Mới 
 Lê Trần Phú
-Nguyễn Huỳnh Trang
+Nguyễn Thị Huyền Trang
 Châu Nguyễn Trọng Hiếu
 
 
