@@ -175,12 +175,32 @@ class Command(BaseCommand):
                     logger.warning(f'Bài báo đã tồn tại (hash): {absolute_link}')
                     continue
 
+                # Extract image URL - prefer og:image meta tag
+                image_url = None
+                og_image = detail_soup.find('meta', property='og:image')
+                if og_image and og_image.get('content'):
+                    image_url = og_image.get('content')
+                    logger.info(f'Found og:image: {image_url}')
+                else:
+                    # Fallback: get the first image in the article content
+                    original_content_tag = detail_soup.find('article', class_='fck_detail')
+                    if original_content_tag:
+                        first_image = original_content_tag.find('img')
+                        if first_image and first_image.get('src'):
+                            image_url = first_image.get('src')
+                            logger.info(f'Found first image: {image_url}')
+                
+                # Ensure image_url is absolute
+                if image_url and not image_url.startswith(('http://', 'https://')):
+                    image_url = urljoin(base_url, image_url)
+
                 Article.objects.create(
                     title=title,
                     original_url=absolute_link,
                     content_hash=content_hash,
                     cleaned_content=cleaned_content,
                     summary='',
+                    image_url=image_url,
                     publication_date=aware_publication_date,
                     category=category,  # ### THAY ĐỔI 5: GÁN ĐÚNG CATEGORY ĐÃ LẤY TỪ DB ###
                     source=source
