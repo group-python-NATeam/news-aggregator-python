@@ -25,6 +25,7 @@ class Article(models.Model):
     content_hash = models.CharField(max_length=64, unique=True)
     cleaned_content = models.TextField()
     summary = models.TextField()
+    image_url = models.URLField(max_length=500, blank=True, null=True)
     publication_date = models.DateTimeField()
     
     # Timestamps tự động
