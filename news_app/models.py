@@ -24,7 +24,8 @@ class Article(models.Model):
     original_url = models.URLField(max_length=1024, unique=True)
     content_hash = models.CharField(max_length=64, unique=True)
     cleaned_content = models.TextField()
-    summary = models.TextField()
+    summary = models.TextField(blank=True, null=True)  # AI-generated Vietnamese summary
+    summary_audio = models.FileField(upload_to='summary_audio/', blank=True, null=True)  # TTS audio file
     image_url = models.URLField(max_length=500, blank=True, null=True)
     publication_date = models.DateTimeField()
     
@@ -33,7 +34,7 @@ class Article(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     # Khóa ngoại (Foreign Keys)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='articles')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='articles', null=True, blank=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE, related_name='articles')
 
     def __str__(self):

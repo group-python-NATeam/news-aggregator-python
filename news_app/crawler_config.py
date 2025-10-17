@@ -26,7 +26,7 @@ CRAWLER_CONFIGS = {
             "suc-khoe": "suc-khoe.htm",
             "the-thao": "the-thao.htm",
             "phap-luat": "phap-luat.htm",
-            "xa-hoi": "xa-hoi.htm",
+            "xa-hoi": "thoi-su.htm",  # DanTri uses 'thoi-su' for Xã hội
         }
     },
     "tuoitre": {

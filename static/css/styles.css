@@ -1,103 +1,694 @@
-/* Base styling */
+/* TikTok-Style News Aggregator - Modern UI/UX */
+
+/* Import modern fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap");
+
+/* Root CSS variables for youthful, harmonious theming */
+:root {
+  /* Youthful Primary Gradients */
+  --primary-gradient: linear-gradient(
+    135deg,
+    #ff6b6b 0%,
+    #ee5a24 50%,
+    #ff9ff3 100%
+  );
+  --secondary-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  --accent-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+
+  /* Trendy Color Palettes */
+  --coral-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+  --mint-gradient: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+  --lavender-gradient: linear-gradient(
+    135deg,
+    #c79dd7 0%,
+    #a8e6cf 50%,
+    #88d8c0 100%
+  );
+  --sunset-gradient: linear-gradient(
+    135deg,
+    #ffeaa7 0%,
+    #fab1a0 50%,
+    #fd79a8 100%
+  );
+  --ocean-gradient: linear-gradient(
+    135deg,
+    #74b9ff 0%,
+    #0984e3 50%,
+    #6c5ce7 100%
+  );
+
+  /* Background & Surface Colors */
+  --dark-bg: #0d1117;
+  --card-bg: rgba(25, 30, 40, 0.95);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b3b9c4;
+  --text-accent: #ff7eb3;
+  --text-muted: #8892a6;
+
+  /* Interactive Colors */
+  --hover-glow: rgba(255, 126, 179, 0.4);
+  --active-glow: rgba(255, 107, 107, 0.6);
+
+  /* Design System */
+  --border-radius: 24px;
+  --border-radius-sm: 16px;
+  --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 30px var(--hover-glow);
+  --shadow-active: 0 0 40px var(--active-glow);
+  --blur-backdrop: blur(20px);
+
+  /* Animation Variables */
+  --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-fast: all 0.2s ease-out;
+}
+
+/* Base styling - Dark TikTok-inspired theme */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f5f5;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  background: var(--dark-bg);
+  background-image: radial-gradient(
+      circle at 20% 80%,
+      rgba(255, 126, 179, 0.15) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(116, 185, 255, 0.12) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(168, 230, 207, 0.1) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 60% 70%,
+      rgba(255, 234, 167, 0.08) 0%,
+      transparent 60%
+    );
+  background-attachment: fixed;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  color: var(--text-primary);
+  line-height: 1.6;
 }
 
-/* Navbar customization */
+/* Modern minimalistic navbar with black background - HIGHEST Z-INDEX */
+.navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+  background: rgba(0, 0, 0, 0.95) !important;
+  backdrop-filter: var(--blur-backdrop) !important;
+  border-bottom: 1px solid rgba(34, 197, 94, 0.3) !important;
+  padding: 0.75rem 0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
 .navbar-brand {
-  font-weight: bold;
-  font-size: 1.5rem;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #ffffff !important;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* Card hover effects */
-.card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.navbar-brand:hover {
+  transform: scale(1.05);
+  color: #22c55e !important;
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+.navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Custom scrollbar for the news feed */
+.navbar-nav .nav-link:hover {
+  color: #22c55e !important;
+  transform: translateY(-2px);
+  text-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+}
+
+.navbar-nav .nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -5px;
+  left: 50%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-nav .nav-link:hover::after {
+  width: 100%;
+}
+
+/* Fix dropdown menu z-index to appear above ALL elements */
+.dropdown-menu {
+  z-index: 10000 !important;
+  position: absolute !important;
+  background: rgba(0, 0, 0, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.3) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  margin-top: 0.5rem !important;
+  min-width: 200px !important;
+}
+
+.dropdown-item {
+  color: #ffffff !important;
+  transition: all 0.3s ease;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  margin: 0.25rem 0.5rem;
+}
+
+.dropdown-item:hover {
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #22c55e !important;
+  text-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+  transform: translateX(5px);
+}
+
+.dropdown-item:focus {
+  background: rgba(34, 197, 94, 0.2) !important;
+  color: #22c55e !important;
+}
+
+/* Ensure dropdown toggle works properly */
+.dropdown-toggle::after {
+  border-top-color: #ffffff !important;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-toggle[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
+/* Navbar toggler styling for mobile */
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  padding: 0.5rem;
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25) !important;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Mobile dropdown improvements */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: rgba(0, 0, 0, 0.95) !important;
+    border: 1px solid rgba(0, 0, 0, 0.3) !important;
+    border-radius: 12px !important;
+    margin-top: 0.5rem !important;
+    padding: 1rem !important;
+    backdrop-filter: blur(10px) !important;
+    z-index: 9999 !important;
+  }
+
+  .dropdown-menu {
+    position: static !important;
+    z-index: 10001 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+}
+
+/* Remove default bootstrap margins for main content */
+main.container {
+  margin-top: 0;
+  padding: 0;
+  max-width: 100%;
+}
+
+/* Custom scrollbar with modern styling */
 .news-feed::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .news-feed::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  background: transparent;
 }
 
 .news-feed::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
+  background: var(--accent-gradient);
+  border-radius: 3px;
+  transition: all 0.3s ease;
 }
 
 .news-feed::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-glow);
 }
 
-/* Text formatting in article cards */
-.content-preview {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.5;
-}
-
-/* Fix for Bootstrap container issues */
-.container {
-  position: relative;
-  z-index: 1;
-}
-
-/* Enhanced image handling */
+/* Enhanced image handling with youthful animations */
 .article-img {
-  transition: transform 0.5s ease;
-  will-change: transform;
+  transition: var(--transition-smooth);
+  will-change: transform, filter;
+  border-radius: var(--border-radius-sm);
 }
 
 .article-card.active .article-img {
+  transform: scale(1.08) rotate(0.5deg);
+  filter: brightness(1.15) contrast(1.2) saturate(1.3);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Subtle hover animations for images */
+.article-img:hover {
   transform: scale(1.02);
+  filter: brightness(1.05) saturate(1.1);
 }
 
-/* Mobile optimization */
+/* Youthful interactive button styles */
+.btn-modern {
+  background: var(--coral-gradient);
+  border: none;
+  border-radius: 25px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: var(--transition-bounce);
+  box-shadow: 0 8px 25px rgba(255, 126, 179, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-modern::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.btn-modern:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: var(--shadow-active);
+  filter: brightness(1.2);
+}
+
+.btn-modern:hover::before {
+  left: 100%;
+}
+
+.btn-modern:active {
+  transform: translateY(-1px) scale(1.02);
+  transition: var(--transition-fast);
+}
+
+/* Glass morphism effects */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--blur-backdrop);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Youthful badge styling with animations */
+.badge {
+  background: var(--lavender-gradient) !important;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 15px rgba(168, 230, 207, 0.4);
+  transition: var(--transition-smooth);
+  animation: subtle-float 3s ease-in-out infinite;
+}
+
+.badge:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(168, 230, 207, 0.6);
+}
+
+/* Floating animation for badges */
+@keyframes subtle-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Enhanced youthful animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes gentle-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-5px) scale(1.02);
+  }
+  75% {
+    transform: translateY(2px) scale(0.98);
+  }
+}
+
+@keyframes color-shift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(10deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Article entrance animation */
+@keyframes article-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.9) rotateX(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in {
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-slide-left {
+  animation: slideInFromLeft 0.6s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInFromRight 0.6s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2.5s infinite;
+}
+
+.animate-bounce {
+  animation: gentle-bounce 1.5s ease-in-out infinite;
+}
+
+.animate-color-shift {
+  animation: color-shift 4s ease-in-out infinite;
+}
+
+.animate-article-entrance {
+  animation: article-entrance 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Skeleton loading states */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: var(--border-radius-sm);
+}
+
+.skeleton-text {
+  height: 20px;
+  margin-bottom: 12px;
+}
+
+.skeleton-title {
+  height: 32px;
+  margin-bottom: 16px;
+  width: 80%;
+}
+
+.skeleton-badge {
+  height: 28px;
+  width: 80px;
+  border-radius: 20px;
+}
+
+/* Enhanced typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 0.8rem;
+}
+
+h2 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mobile-first responsive design */
 @media (max-width: 768px) {
-  .article-card {
-    height: 90vh;
+  .navbar-brand {
+    font-size: 1.2rem;
   }
 
-  .article-overlay {
-    padding: 1rem;
+  .navbar {
+    padding: 0.5rem 0;
   }
 
-  .article-overlay h2 {
-    font-size: 1.5rem;
-  }
-
-  /* Fix navigation on small screens */
-  .navbar-collapse {
-    background-color: rgba(33, 37, 41, 0.95);
-    padding: 1rem;
-    border-radius: 0.5rem;
-  }
-
-  /* Improve readability on mobile */
-  .content-preview {
-    -webkit-line-clamp: 2;
+  .btn-modern {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
   }
 }
 
-/* Fix for iOS and Safari */
+/* Fix for iOS and Safari with enhanced performance */
 @supports (-webkit-overflow-scrolling: touch) {
   .news-feed {
     -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
   }
+}
+
+/* Enhanced loading states with youthful colors */
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 126, 179, 0.1),
+    rgba(255, 234, 167, 0.2),
+    rgba(168, 230, 207, 0.1)
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Interactive hover states */
+.hover-lift {
+  transition: var(--transition-smooth);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Micro-interaction for clickable elements */
+.clickable {
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.clickable:active {
+  transform: scale(0.95);
+}
+
+/* Staggered animations for lists */
+.stagger-animation:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.stagger-animation:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.stagger-animation:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.stagger-animation:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.stagger-animation:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Enhanced focus states for accessibility */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Modern scrollbar for Firefox */
+.news-feed {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79, 172, 254, 0.8) transparent;
+}
+
+/* CRITICAL: Ensure ALL navbar elements stay on top of everything */
+.navbar * {
+  z-index: inherit !important;
+}
+
+.navbar-nav {
+  z-index: 9999 !important;
+}
+
+.navbar-brand {
+  z-index: 9999 !important;
+}
+
+.navbar-toggler {
+  z-index: 9999 !important;
+}
+
+/* Force navbar container to be above everything */
+.navbar-expand-lg {
+  z-index: 9999 !important;
+}
+
+/* Additional dropdown styling to ensure visibility */
+.dropdown {
+  z-index: 10000 !important;
+}
+
+.dropdown-toggle {
+  z-index: 10000 !important;
+}
+
+/* Navbar should never be hidden */
+.navbar,
+.navbar * {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Override any potential conflicts with article cards */
+.article-card {
+  z-index: 1 !important;
+}
+
+.article-card.active {
+  z-index: 2 !important;
+}
+
+/* Ensure main content doesn't interfere with navbar */
+main {
+  z-index: 0 !important;
 }

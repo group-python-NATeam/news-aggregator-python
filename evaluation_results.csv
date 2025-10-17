@@ -1,0 +1,11 @@
+article_id,title,true_category,predicted_category,is_correct
+90,Trái Đất đang trở nên tối hơn,cong-nghe,cong-nghe,1
+87,Đại hội Đảng bộ TP.HCM nhiệm kỳ 2025 - 2030 họp phiên trù bị,phap-luat,phap-luat,1
+88,TP.HCM định hình siêu đô thị đáng sống,xa-hoi,xa-hoi,1
+89,Miền Bắc mưa to do ảnh hưởng không khí lạnh,xa-hoi,kinh-te,0
+71,Loạt công nghệ âm thanh đáng chú ý vừa đổ bộ thị trường Việt,cong-nghe,cong-nghe,1
+72,"Ông Donald Trump 'ra đòn', 770 tỉ USD bốc hơi khỏi thị trường công nghệ Mỹ",kinh-te,kinh-te,1
+73,Toyota đẩy mạnh công nghệ pin thể rắn cho xe điện,cong-nghe,cong-nghe,1
+74,Tại sao tín đồ âm thanh không ưa chuộng soundbar?,cong-nghe,cong-nghe,1
+75,7 cách giúp tăng tốc Wi-Fi,cong-nghe,cong-nghe,1
+61,HLV Kim Sang Sik được đề xuất tặng bằng khen của Thủ tướng,the-thao,the-thao,1

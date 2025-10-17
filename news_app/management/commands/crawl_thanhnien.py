@@ -12,6 +12,7 @@ from datetime import datetime
 
 from news_app.crawler_config import CRAWLER_CONFIGS
 from news_app.models import Article, Category, Source
+from news_app.tasks import classify_article_task
 
 logger = logging.getLogger('crawler')
 
@@ -45,7 +46,7 @@ class Command(BaseCommand):
         logger.info(f'Tìm thấy {len(list_urls)} bài báo tiềm năng trên trang chuyên mục.')
 
         source_obj, _ = Source.objects.get_or_create(name="Thanh Niên", defaults={"base_url": cfg["base_url"]})
-        category_obj, _ = Category.objects.get_or_create(slug=category_slug, defaults={"name": category_slug.replace("-", " ").title()})
+        # Remove manual category lookup - will use AI prediction instead
 
         created_count = 0
         for url in list_urls[:limit]:
@@ -67,19 +68,28 @@ class Command(BaseCommand):
                     time.sleep(0.5)
                     continue
 
-                Article.objects.create(
+
+                article, created = Article.objects.update_or_create(
                     original_url=url,
-                    title=data["title"],
-                    publication_date=data["publication_date"],
-                    cleaned_content=data["content"],
-                    content_hash=content_hash,
-                    summary="",
-                    image_url=data.get("image_url"),
-                    source=source_obj,
-                    category=category_obj,
+                    defaults={
+                        'title': data["title"],
+                        'publication_date': data["publication_date"],
+                        'cleaned_content': data["content"],
+                        'content_hash': content_hash,
+                        'image_url': data.get("image_url"),
+                        'source': source_obj,
+                        'category': None,  # IMPORTANT: leave None; classification is async
+                    }
                 )
-                created_count += 1
-                logger.info(f'Đã lưu bài báo: {data["title"][:80]}')
+                if created:
+                    created_count += 1
+                    logger.info(f"CREATED: {data['title'][:80]}")
+                else:
+                    logger.info(f"UPDATED: {data['title'][:80]}")
+
+                # Dispatch the main async pipeline (classify -> then summarize via chaining)
+                classify_article_task.delay(article.id)
+                logger.info(f'✅ Dispatched main processing task for Article ID {article.id}.')
 
                 # be polite
                 time.sleep(0.6)
