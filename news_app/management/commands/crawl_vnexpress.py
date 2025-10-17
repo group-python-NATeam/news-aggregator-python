@@ -11,6 +11,7 @@ from django.utils.timezone import make_aware
 
 from news_app.models import Article, Category, Source
 from news_app.crawler_config import CRAWLER_CONFIGS # ### THAY ĐỔI 1: Import config ###
+from news_app.tasks import classify_article_task
 
 logger = logging.getLogger('crawler')
 
@@ -71,11 +72,7 @@ class Command(BaseCommand):
 
         logger.info(f'Bắt đầu crawl {SOURCE_NAME} chuyên mục "{standard_slug}" (slug thực tế: {source_specific_slug}) với giới hạn {limit} bài...')
 
-        try:
-            category = Category.objects.get(slug=standard_slug)
-        except Category.DoesNotExist:
-            logger.error(f'Category với slug="{standard_slug}" không tồn tại trong database.')
-            return
+        # Remove manual category lookup - will use AI prediction instead
 
         source, _ = Source.objects.get_or_create(name=SOURCE_NAME, defaults={'base_url': base_url})
         
@@ -194,19 +191,31 @@ class Command(BaseCommand):
                 if image_url and not image_url.startswith(('http://', 'https://')):
                     image_url = urljoin(base_url, image_url)
 
-                Article.objects.create(
-                    title=title,
+
+                # Use update_or_create for better deduplication
+                article, created = Article.objects.update_or_create(
                     original_url=absolute_link,
-                    content_hash=content_hash,
-                    cleaned_content=cleaned_content,
-                    summary='',
-                    image_url=image_url,
-                    publication_date=aware_publication_date,
-                    category=category,  # ### THAY ĐỔI 5: GÁN ĐÚNG CATEGORY ĐÃ LẤY TỪ DB ###
-                    source=source
+                    defaults={
+                        'title': title,
+                        'content_hash': content_hash,
+                        'cleaned_content': cleaned_content,
+                        'summary': None,   # keep empty; summarized asynchronously
+                        'image_url': image_url,
+                        'publication_date': aware_publication_date,
+                        'category': None,  # IMPORTANT: leave None; classification is async
+                        'source': source
+                    }
                 )
-                created_count += 1
-                logger.info(f'Đã lưu bài báo: {title}')
+                
+                if created:
+                    created_count += 1
+                    logger.info(f'CREATED: {title}')
+                else:
+                    logger.info(f'UPDATED: {title}')
+
+                # Dispatch the main async pipeline (classify -> then summarize via chaining)
+                classify_article_task.delay(article.id)
+                logger.info(f'✅ Dispatched main processing task for Article ID {article.id}.')
 
             except Exception as e:
                 # Khối except này bây giờ sẽ bắt lỗi cuối cùng từ vòng lặp retry, hoặc các lỗi parse khác

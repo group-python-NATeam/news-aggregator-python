@@ -11,6 +11,7 @@ from django.utils.timezone import make_aware
 
 from news_app.models import Article, Category, Source
 from news_app.crawler_config import CRAWLER_CONFIGS
+from news_app.tasks import classify_article_task
 
 logger = logging.getLogger('crawler')
 
@@ -49,11 +50,12 @@ class Command(BaseCommand):
 
         logger.info(f'Bắt đầu crawl {SOURCE_NAME} chuyên mục "{standard_slug}" (slug thực tế: {source_specific_slug}) với giới hạn {limit} bài...')
 
-        try:
-            category = Category.objects.get(slug=standard_slug)
-        except Category.DoesNotExist:
-            logger.error(f'Category với slug="{standard_slug}" không tồn tại trong database.')
-            return
+        # Remove manual category lookup - will use AI prediction instead
+
+        # Use a desktop-like User-Agent to reduce 403/404 due to blocking
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
 
         source, _ = Source.objects.get_or_create(name="Dân Trí", defaults={'base_url': base_url})
         
@@ -65,7 +67,7 @@ class Command(BaseCommand):
         RETRY_DELAY = 2  # seconds
 
         try:
-            response = requests.get(url_to_crawl, timeout=10)
+            response = requests.get(url_to_crawl, headers=headers, timeout=10)
             response.raise_for_status()
         except requests.RequestException as e:
             logger.error(f'Lỗi khi tải trang chuyên mục {url_to_crawl}: {e}', exc_info=True)
@@ -107,7 +109,7 @@ class Command(BaseCommand):
                 for attempt in range(MAX_RETRIES):
                     try:
                         logger.info(f'Đang crawl trang chi tiết: {absolute_link}')
-                        detail_response = requests.get(absolute_link, timeout=10)
+                        detail_response = requests.get(absolute_link, headers=headers, timeout=10)
                         detail_response.raise_for_status()
                         break
                     except requests.RequestException as e:
@@ -183,19 +185,28 @@ class Command(BaseCommand):
                 if image_url and not image_url.startswith(('http://', 'https://')):
                     image_url = urljoin(base_url, image_url)
 
-                Article.objects.create(
-                    title=title,
+
+                article, created = Article.objects.update_or_create(
                     original_url=absolute_link,
-                    content_hash=content_hash,
-                    cleaned_content=cleaned_content,
-                    summary='',
-                    image_url=image_url,
-                    publication_date=aware_publication_date,
-                    category=category,
-                    source=source
+                    defaults={
+                        'title': title,
+                        'publication_date': aware_publication_date,
+                        'cleaned_content': cleaned_content,
+                        'content_hash': content_hash,
+                        'image_url': image_url,
+                        'source': source,
+                        'category': None,  # IMPORTANT: leave None; classification is async
+                    }
                 )
-                created_count += 1
-                logger.info(f'Đã lưu bài báo: {title}')
+                if created:
+                    created_count += 1
+                    logger.info(f"CREATED: {title}")
+                else:
+                    logger.info(f"UPDATED: {title}")
+
+                # Dispatch the main async pipeline (classify -> then summarize via chaining)
+                classify_article_task.delay(article.id)
+                logger.info(f'✅ Dispatched main processing task for Article ID {article.id}.')
 
             except Exception as e:
                 logger.error(f'Lỗi không xác định khi xử lý {absolute_link}: {e}', exc_info=True)

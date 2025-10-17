@@ -223,4 +223,4 @@ venv/
 
 # IDE / Editor specific
 .vscode/
-.idea/
+.idea/news_app/ml_models/my-finetuned-phobert/model.safetensors

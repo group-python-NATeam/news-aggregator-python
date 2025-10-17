@@ -1,129 +1,1116 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Latest News | News Aggregator{% endblock %}
+{% block title %}Latest News | TikTok-Style News{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Main feed container */
+    /* Multi-Device Responsive TikTok-Style Layout */
     .news-feed {
-        height: 85vh;
+        height: 100vh;
         overflow-y: scroll;
         scroll-snap-type: y mandatory;
         position: relative;
         -webkit-overflow-scrolling: touch;
-        /* Smooth scrolling on iOS */
+        background: var(--dark-bg);
         padding: 0;
-        margin: 0 -15px;
-        /* Compensate for container padding */
+        margin: 0;
+        z-index: 0 !important;
+        /* Ensure navbar is always visible */
+        padding-top: 80px;
+        /* Desktop: Center content */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* Force smooth scrolling and snap */
+        scroll-behavior: smooth;
     }
 
-    /* Individual article card */
+    /* Base Article Cards - Responsive Foundation */
     .article-card {
-        scroll-snap-align: start;
-        height: 85vh;
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+        height: calc(100vh - 80px);
+        min-height: calc(100vh - 80px);
         position: relative;
-        margin-bottom: 1rem;
-        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
-        transition: transform 0.2s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        background: #0a0a0a;
+        margin-bottom: 0;
+        z-index: 1 !important;
+        /* Default: Mobile-first (narrow) */
+        width: 100%;
+        max-width: 100%;
+        /* Force single viewport focus */
+        box-sizing: border-box;
     }
 
-    /* Active card styling */
-    .article-card.active {
-        z-index: 2;
-    }
-
-    /* Image container */
-    .article-img-container {
-        height: 100%;
+    /* Image Section - 70% of screen */
+    .image-section {
+        height: 70vh;
         width: 100%;
         position: relative;
+        overflow: hidden;
     }
 
-    /* Article image */
+    /* Main Article Image with Blur Background */
     .article-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        filter: brightness(0.8) contrast(1.1) saturate(1.1);
     }
 
-    /* Text overlay */
-    .article-overlay {
+    /* Blurred Background Image for Depth */
+    .blur-background {
         position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 2rem;
-        background: linear-gradient(to top,
-                rgba(0, 0, 0, 0.9),
-                rgba(0, 0, 0, 0.7) 30%,
-                rgba(0, 0, 0, 0.4) 60%,
-                transparent);
-        color: white;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        top: -10%;
+        left: -10%;
+        width: 120%;
+        height: 120%;
+        background-size: cover;
+        background-position: center;
+        filter: blur(20px) brightness(0.4) saturate(1.3);
+        z-index: -1;
+        transform: scale(1.1);
+        transition: all 1s ease;
     }
 
-    /* Placeholder when no image is available */
-    .no-image-placeholder {
-        background-color: #343a40;
+    /* Main Image Container */
+    .main-image-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        height: 80%;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        z-index: 2;
+    }
+
+    /* Active Card Effects */
+    .article-card.active .article-img {
+        transform: scale(1.05) rotate(0.5deg);
+        filter: brightness(0.9) contrast(1.2) saturate(1.3);
+    }
+
+    .article-card.active .blur-background {
+        filter: blur(25px) brightness(0.3) saturate(1.5);
+        transform: scale(1.2);
+    }
+
+    .article-card.active .main-image-container {
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 126, 179, 0.3);
+    }
+
+    /* Content Section - 30% of screen */
+    .content-section {
+        height: 30vh;
+        width: 100%;
+        position: relative;
+        background: linear-gradient(to top,
+                rgba(10, 10, 10, 0.98) 0%,
+                rgba(10, 10, 10, 0.95) 30%,
+                rgba(10, 10, 10, 0.8) 70%,
+                transparent 100%);
+        backdrop-filter: blur(15px);
+        padding: 1.5rem 1rem 1rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         color: white;
+        z-index: 3;
+    }
+
+    /* Top Row - Engagement Stats */
+    .engagement-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+
+    .engagement-stats {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:active {
+        transform: scale(1.2);
+    }
+
+    .stat-icon {
+        font-size: 1.5rem;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        animation: gentle-pulse 3s infinite;
+    }
+
+    .stat-count {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        align-items: center;
+    }
+
+    .action-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        backdrop-filter: blur(10px);
+    }
+
+    .action-btn:hover {
+        transform: scale(1.15) rotate(10deg);
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Middle Row - Article Content */
+    .article-content-row {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 0.5rem 0;
+    }
+
+    /* Article Title */
+    .article-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: clamp(1rem, 4vw, 1.3rem);
+        font-weight: 700;
+        line-height: 1.2;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* 3-Sentence Summary */
+    .article-summary {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 400;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Bottom Row - Source & Author Info */
+    .source-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .source-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .source-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #22c55e;
+        text-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+    }
+
+    .publish-time {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .category-badge {
+        background: var(--lavender-gradient);
+        border-radius: 15px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(168, 230, 207, 0.4);
+        animation: subtle-float 4s ease-in-out infinite;
+    }
+
+    /* Audio Indicator */
+    .audio-indicator {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        color: #22c55e;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        z-index: 4;
+    }
+
+    .article-card.audio-playing .audio-indicator {
+        opacity: 1;
+        animation: pulse 2s infinite;
+    }
+
+    /* No Image Placeholder */
+    .no-image-placeholder {
+        background: linear-gradient(135deg,
+                rgba(34, 197, 94, 0.8) 0%,
+                rgba(168, 230, 207, 0.6) 50%,
+                rgba(116, 185, 255, 0.8) 100%);
         display: flex;
         justify-content: center;
         align-items: center;
         text-align: center;
         height: 100%;
         width: 100%;
+        color: white;
+        position: relative;
+        overflow: hidden;
     }
 
-    /* Fix Bootstrap container overflow */
-    @media (max-width: 576px) {
+    .no-image-content h3 {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Desktop Layout - Wider, More Immersive Format */
+    @media (min-width: 1024px) {
         .news-feed {
-            margin: 0 -20px;
+            /* Center the content with wider cards */
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, rgba(10, 10, 10, 0.9), rgba(5, 5, 5, 1));
         }
 
         .article-card {
+            /* Wider desktop format - uses more horizontal space */
+            width: 80vw;
+            max-width: 1200px;
+            min-width: 800px;
+            height: calc(100vh - 80px);
+            min-height: calc(100vh - 80px);
+            border-radius: 24px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 50px rgba(255, 126, 179, 0.15);
+            margin: 0 auto;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Ensure perfect single viewport focus */
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+
+        /* Desktop: Wider image containers */
+        .main-image-container {
+            width: 95% !important;
+            height: 85% !important;
+            border-radius: 20px;
+        }
+
+        /* Desktop: Enhanced content layout */
+        .content-section {
+            padding: 2rem 3rem 2rem 3rem !important;
+            background: linear-gradient(to top,
+                    rgba(10, 10, 10, 0.98) 0%,
+                    rgba(10, 10, 10, 0.95) 30%,
+                    rgba(10, 10, 10, 0.85) 70%,
+                    transparent 100%);
+        }
+
+        /* Desktop: Larger engagement stats */
+        .engagement-stats {
+            gap: 2.5rem !important;
+        }
+
+        .stat-icon {
+            font-size: 2rem !important;
+        }
+
+        .stat-count {
+            font-size: 0.9rem !important;
+        }
+
+        /* Desktop: Enhanced typography */
+        .article-title {
+            font-size: clamp(1.5rem, 3vw, 2.2rem) !important;
+            line-height: 1.2;
+        }
+
+        .article-summary {
+            font-size: 1rem !important;
+            line-height: 1.5;
+            max-width: 80%;
+        }
+
+        /* Desktop: Larger action buttons */
+        .action-btn {
+            width: 55px !important;
+            height: 55px !important;
+            font-size: 1.4rem !important;
+        }
+
+        /* Desktop: Side decorative elements */
+        .article-card::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -2px;
+            width: 4px;
+            height: 60%;
+            background: var(--coral-gradient);
+            border-radius: 2px;
+            transform: translateY(-50%);
+            box-shadow: 0 0 20px rgba(255, 126, 179, 0.6);
+            z-index: 5;
+        }
+
+        .article-card::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -2px;
+            width: 4px;
+            height: 60%;
+            background: var(--mint-gradient);
+            border-radius: 2px;
+            transform: translateY(-50%);
+            box-shadow: 0 0 20px rgba(168, 230, 207, 0.6);
+            z-index: 5;
+        }
+    }
+
+    /* Tablet Layout - Portrait & Landscape Optimized */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .article-card {
+            /* Tablet: Intermediate width */
+            width: 70vw;
+            max-width: 600px;
+            min-width: 500px;
+            height: calc(100vh - 80px);
+            min-height: calc(100vh - 80px);
+            margin: 0 auto;
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 126, 179, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Ensure perfect single viewport focus */
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+        }
+
+        /* Tablet: Adjust image container */
+        .main-image-container {
+            width: 92% !important;
+            height: 82% !important;
+        }
+
+        /* Tablet: Enhanced content spacing */
+        .content-section {
+            padding: 1.8rem 2rem 1.5rem 2rem !important;
+        }
+
+        /* Tablet: Medium engagement stats */
+        .engagement-stats {
+            gap: 2rem !important;
+        }
+
+        .stat-icon {
+            font-size: 1.7rem !important;
+        }
+
+        .stat-count {
+            font-size: 0.8rem !important;
+        }
+
+        /* Tablet: Typography adjustments */
+        .article-title {
+            font-size: clamp(1.2rem, 4vw, 1.8rem) !important;
+        }
+
+        .article-summary {
+            font-size: 0.95rem !important;
+            line-height: 1.4;
+        }
+
+        /* Tablet: Medium action buttons */
+        .action-btn {
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 1.3rem !important;
+        }
+
+        /* Tablet Landscape specific adjustments */
+        @media (orientation: landscape) {
+            .article-card {
+                width: 60vw;
+                max-width: 800px;
+            }
+
+            .content-section {
+                padding: 1.5rem 2.5rem 1.2rem 2.5rem !important;
+            }
+        }
+    }
+
+    /* Enhanced Mobile Layout - Optimized for One-Handed Use */
+    @media (max-width: 767px) {
+        .news-feed {
+            padding-top: 70px; /* Reduce navbar space on mobile */
+        }
+        
+        .article-card {
+            /* Mobile: Full-width, narrow format */
+            width: 100%;
+            max-width: 100%;
             border-radius: 0;
+            height: calc(100vh - 70px);
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Mobile: Larger content section for better readability */
+        .content-section {
+            height: 35vh !important; /* More space for content on mobile */
+            padding: 1rem 1rem 1.5rem 1rem !important;
+        }
+        
+        .image-section {
+            height: 65vh !important; /* Adjust image to give more content space */
+        }
+        
+        /* Mobile: Touch-optimized interactions */
+        .stat-item {
+            padding: 0.5rem;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            min-width: 60px;
+        }
+
+        .stat-item:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Mobile: Larger touch targets */
+        .action-btn {
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 1.2rem !important;
+        }
+
+        /* Mobile: Optimized typography for smaller screens */
+        .article-title {
+            font-size: clamp(1rem, 5vw, 1.3rem) !important;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+        }
+
+        .article-summary {
+            font-size: 0.85rem !important;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+        }
+
+        /* Mobile: Swipe indicators */
+        .news-feed::before {
+            content: '';
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            z-index: 10;
+            animation: swipe-hint 3s ease-in-out infinite;
+        }
+    }
+
+    /* Enhanced Animations */
+    @keyframes gentle-pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes swipe-hint {
+
+        0%,
+        100% {
+            opacity: 0.3;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: translateX(-50%) translateY(-5px);
+        }
+    }
+
+    /* Device-Specific Hover Effects */
+    @media (hover: hover) and (pointer: fine) {
+
+        /* Desktop/Tablet hover effects */
+        .article-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.7), 0 0 60px rgba(255, 126, 179, 0.3);
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+    }
+
+    /* Touch-device specific styles */
+    @media (hover: none) and (pointer: coarse) {
+        .article-card {
+            /* Enhanced touch feedback */
+            transition: all 0.2s ease;
+        }
+    }
+
+    @keyframes subtle-float {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        33% {
+            transform: translateY(-2px) rotate(1deg);
+        }
+
+        66% {
+            transform: translateY(2px) rotate(-1deg);
+        }
+    }
+
+    @keyframes slide-up-fade {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Staggered Content Animations */
+    .article-content-row>* {
+        animation: slide-up-fade 0.6s ease-out;
+    }
+
+    .article-content-row>*:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .article-content-row>*:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .source-row {
+        animation: slide-up-fade 0.6s ease-out 0.3s both;
+    }
+
+    /* Responsive Global Unmute Button */
+    .global-unmute-button {
+        position: fixed !important;
+        z-index: 100 !important;
+        border-radius: 50% !important;
+        background: var(--coral-gradient) !important;
+        color: white !important;
+        border: none !important;
+        cursor: pointer !important;
+        box-shadow: 0 10px 30px rgba(255, 126, 179, 0.4) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: none;
+        backdrop-filter: blur(10px) !important;
+    }
+
+    /* Mobile: Larger, easier to tap */
+    @media (max-width: 767px) {
+        .global-unmute-button {
+            bottom: 25px !important;
+            right: 25px !important;
+            width: 65px !important;
+            height: 65px !important;
+            font-size: 1.6rem !important;
+        }
+    }
+
+    /* Tablet: Medium size */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .global-unmute-button {
+            bottom: 30px !important;
+            right: 30px !important;
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 1.5rem !important;
+        }
+    }
+
+    /* Desktop: Smaller, more elegant */
+    @media (min-width: 1024px) {
+        .global-unmute-button {
+            bottom: 35px !important;
+            right: 35px !important;
+            width: 55px !important;
+            height: 55px !important;
+            font-size: 1.4rem !important;
+        }
+
+        .global-unmute-button:hover {
+            transform: translateY(-3px) scale(1.1) !important;
+            box-shadow: 0 15px 40px rgba(255, 126, 179, 0.6) !important;
+        }
+    }
+
+    /* Enhanced Responsive Navigation */
+    @media (max-width: 767px) {
+
+        /* Mobile: Collapsed navigation */
+        .navbar {
+            padding: 0.5rem 0 !important;
+        }
+
+        .navbar-brand {
+            font-size: 1.1rem !important;
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+
+        /* Tablet: Balanced navigation */
+        .navbar {
+            padding: 0.6rem 0 !important;
+        }
+
+        .navbar-brand {
+            font-size: 1.3rem !important;
+        }
+    }
+
+    @media (min-width: 1024px) {
+
+        /* Desktop: Full navigation with additional space */
+        .navbar {
+            padding: 0.8rem 0 !important;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem !important;
+        }
+
+        /* Desktop: Enhanced dropdown */
+        .dropdown-menu {
+            min-width: 250px !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 1.1rem !important;
+            margin: 0 0.5rem;
+        }
+    }
+
+    /* Advanced Cross-Device Performance Optimizations */
+    @media (max-width: 767px) {
+
+        /* Mobile: Performance optimizations */
+        .article-card {
+            will-change: transform;
+            transform: translateZ(0);
+            /* Hardware acceleration */
+        }
+
+        .blur-background {
+            filter: blur(15px) brightness(0.4) saturate(1.2);
+            /* Reduced blur for performance */
+        }
+    }
+
+    @media (min-width: 768px) {
+
+        /* Tablet/Desktop: Enhanced visual effects */
+        .blur-background {
+            filter: blur(25px) brightness(0.3) saturate(1.4);
+        }
+
+        .article-card.active .blur-background {
+            filter: blur(30px) brightness(0.25) saturate(1.6);
+        }
+    }
+
+    /* Enhanced accessibility */
+    @media (prefers-reduced-motion: reduce) {
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+
+    /* Smooth scroll behavior */
+    @media (prefers-reduced-motion: no-preference) {
+        .article-card {
+            animation: slide-up-fade 0.8s ease-out;
+        }
+    }
+
+    /* High-DPI display optimizations */
+    @media (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi) {
+        .article-img {
+            image-rendering: -webkit-optimize-contrast;
+        }
+    }
+
+    /* Cross-Device Animation Staggering */
+    .article-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .article-card:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .article-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .article-card:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .article-card:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    /* Enhanced Focus States for Accessibility */
+    .stat-item:focus-visible,
+    .action-btn:focus-visible {
+        outline: 3px solid var(--text-accent);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 6px rgba(255, 126, 179, 0.3);
+    }
+
+    /* Loading States for Better UX */
+    .article-card.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+    .article-card.loading .article-img {
+        filter: grayscale(1) brightness(0.5);
+    }
+
+    /* Print Styles (if needed) */
+    @media print {
+        .news-feed {
+            height: auto;
+            overflow: visible;
+        }
+
+        .article-card {
+            height: auto;
+            page-break-inside: avoid;
+            margin-bottom: 2rem;
+        }
+
+        .global-unmute-button,
+        .action-btn {
+            display: none;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Enhanced Global Unmute Button -->
+<button id="global-unmute-button" class="global-unmute-button" aria-label="Unmute all audio">
+    🔇
+</button>
+
+<!-- TikTok-Style News Feed -->
 <div class="news-feed">
     {% for article in articles %}
-    <div class="article-card">
-        <div class="article-img-container">
+    <article class="article-card animate-fade-in" data-article-id="{{ article.id }}">
+        <!-- Image Section - 70% of screen -->
+        <div class="image-section">
             {% if article.image_url %}
-            <img src="{{ article.image_url }}" class="article-img" alt="{{ article.title }}">
+            <!-- Blurred Background -->
+            <div class="blur-background" style="background-image: url('{{ article.image_url }}');"></div>
+
+            <!-- Main Image Container -->
+            <div class="main-image-container">
+                <img src="{{ article.image_url }}" class="article-img" alt="{{ article.title }}" loading="lazy"
+                    decoding="async">
+            </div>
             {% else %}
             <div class="no-image-placeholder">
-                <div>
+                <div class="no-image-content">
                     <h3>{{ article.source.name }}</h3>
-                    <p>No image available</p>
+                    <p>📰 Breaking News</p>
                 </div>
             </div>
             {% endif %}
 
-            <div class="article-overlay">
-                <h2 class="mb-3">{{ article.title }}</h2>
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="badge bg-primary">{{ article.category.name }}</span>
-                    <small>{{ article.publication_date|date:"d/m/Y H:i" }}</small>
+            <!-- Audio Indicator -->
+            <div class="audio-indicator">🎵 Playing</div>
+
+            <!-- TTS Audio Element -->
+            {% if article.summary_audio %}
+            <audio class="article-audio" src="{{ article.summary_audio.url }}" preload="none" muted
+                data-article-id="{{ article.id }}">
+            </audio>
+            {% endif %}
+        </div>
+
+        <!-- Content Section - 30% of screen -->
+        <div class="content-section">
+            <!-- Top Row - Engagement Stats -->
+            <div class="engagement-row">
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">❤️</span>
+                        <span class="stat-count">{{ article.id|add:"127" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💬</span>
+                        <span class="stat-count">{{ article.id|add:"23" }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">👁️</span>
+                        <span class="stat-count">{{ article.id|add:"456" }}K</span>
+                    </div>
                 </div>
-                <p class="mt-3 content-preview">{{ article.cleaned_content|truncatewords:25 }}</p>
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <span class="fw-bold">Source: {{ article.source.name }}</span>
-                    <a href="{{ article.original_url }}" class="btn btn-sm btn-light" target="_blank">Read More</a>
+
+                <div class="quick-actions">
+                    <button class="action-btn"
+                        onclick="shareArticle('{{ article.title }}', '{{ article.original_url }}')" title="Share">
+                        📤
+                    </button>
+                    <button class="action-btn" title="Save">
+                        🔖
+                    </button>
                 </div>
             </div>
+
+            <!-- Middle Row - Article Content -->
+            <div class="article-content-row">
+                <h2 class="article-title">{{ article.title }}</h2>
+
+                {% if article.summary %}
+                <p class="article-summary">
+                    {% with summary_sentences=article.summary|slice:":300" %}
+                    {{ summary_sentences }}...
+                    {% endwith %}
+                </p>
+                {% endif %}
+            </div>
+
+            <!-- Bottom Row - Source & Author Info -->
+            <div class="source-row">
+                <div class="source-info">
+                    <span class="source-name">{{ article.source.name }}</span>
+                    <span class="publish-time">{{ article.publication_date|date:"H:i - d/m/Y" }}</span>
+                </div>
+                <span class="category-badge">{{ article.category.name }}</span>
+            </div>
         </div>
-    </div>
+    </article>
     {% empty %}
-    <div class="alert alert-info">
-        No articles available yet. Please check back later.
-    </div>
+    <!-- Fallback sample articles when database is empty -->
+    <article class="article-card animate-fade-in" data-article-id="1">
+        <div class="image-section">
+            <div class="blur-background" style="background-image: url('https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800');"></div>
+            <div class="main-image-container">
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800" class="article-img" alt="AI Technology" loading="lazy" decoding="async">
+            </div>
+            <div class="audio-indicator">🎵 Playing</div>
+        </div>
+        <div class="content-section">
+            <div class="engagement-row">
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">❤️</span>
+                        <span class="stat-count">142</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💬</span>
+                        <span class="stat-count">28</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">👁️</span>
+                        <span class="stat-count">567K</span>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="shareArticle('Revolutionary AI Technology', 'https://example.com')" title="Share">📤</button>
+                    <button class="action-btn" title="Save">🔖</button>
+                </div>
+            </div>
+            <div class="article-content-row">
+                <h2 class="article-title">Revolutionary AI Technology Changes Everything in Tech Industry</h2>
+                <p class="article-summary">A groundbreaking artificial intelligence technology has been unveiled that promises to revolutionize the way we interact with computers. This new development could change the entire landscape of technology. Industry experts are calling it the most significant breakthrough in decades.</p>
+            </div>
+            <div class="source-row">
+                <div class="source-info">
+                    <span class="source-name">TechNews</span>
+                    <span class="publish-time">15:30 - 17/10/2025</span>
+                </div>
+                <span class="category-badge">Technology</span>
+            </div>
+        </div>
+    </article>
+    
+    <article class="article-card animate-fade-in" data-article-id="2">
+        <div class="image-section">
+            <div class="blur-background" style="background-image: url('https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=800');"></div>
+            <div class="main-image-container">
+                <img src="https://images.unsplash.com/photo-1569163139394-de4e4f43e4e3?w=800" class="article-img" alt="Climate Summit" loading="lazy" decoding="async">
+            </div>
+            <div class="audio-indicator">🎵 Playing</div>
+        </div>
+        <div class="content-section">
+            <div class="engagement-row">
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">❤️</span>
+                        <span class="stat-count">298</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💬</span>
+                        <span class="stat-count">45</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">👁️</span>
+                        <span class="stat-count">1.2M</span>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="shareArticle('Climate Agreement', 'https://example.com')" title="Share">📤</button>
+                    <button class="action-btn" title="Save">🔖</button>
+                </div>
+            </div>
+            <div class="article-content-row">
+                <h2 class="article-title">Global Climate Summit Reaches Historic Agreement on Carbon Reduction</h2>
+                <p class="article-summary">World leaders have reached a landmark agreement on carbon emission reduction targets at the global climate summit. The accord represents the most ambitious environmental commitment ever made by participating nations. Environmental groups are praising the comprehensive nature of the agreement.</p>
+            </div>
+            <div class="source-row">
+                <div class="source-info">
+                    <span class="source-name">NewsDaily</span>
+                    <span class="publish-time">12:45 - 17/10/2025</span>
+                </div>
+                <span class="category-badge">Politics</span>
+            </div>
+        </div>
+    </article>
+    
+    <article class="article-card animate-fade-in" data-article-id="3">
+        <div class="image-section">
+            <div class="blur-background" style="background-image: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800');"></div>
+            <div class="main-image-container">
+                <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800" class="article-img" alt="Championship Finals" loading="lazy" decoding="async">
+            </div>
+            <div class="audio-indicator">🎵 Playing</div>
+        </div>
+        <div class="content-section">
+            <div class="engagement-row">
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">❤️</span>
+                        <span class="stat-count">1.8K</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">💬</span>
+                        <span class="stat-count">312</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">👁️</span>
+                        <span class="stat-count">5.7M</span>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="shareArticle('Championship Record', 'https://example.com')" title="Share">📤</button>
+                    <button class="action-btn" title="Save">🔖</button>
+                </div>
+            </div>
+            <div class="article-content-row">
+                <h2 class="article-title">Championship Finals Break All-Time Viewership Records</h2>
+                <p class="article-summary">The championship finals have shattered all previous television viewership records with over 100 million viewers worldwide. The thrilling match kept audiences on the edge of their seats for the entire duration. Sports analysts are calling it one of the greatest games ever played.</p>
+            </div>
+            <div class="source-row">
+                <div class="source-info">
+                    <span class="source-name">SportsTimes</span>
+                    <span class="publish-time">20:15 - 16/10/2025</span>
+                </div>
+                <span class="category-badge">Sports</span>
+            </div>
+        </div>
+    </article>
     {% endfor %}
 </div>
 {% endblock %}
@@ -132,35 +1119,419 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const newsFeed = document.querySelector('.news-feed');
+        const globalUnmuteBtn = document.getElementById('global-unmute-button');
 
-        // Optional: Initialize to first article
-        if (newsFeed && newsFeed.children.length > 0) {
-            newsFeed.scrollTop = 0;
-        }
+        let isUnmuted = false;
+        let currentPlayingAudio = null;
+        let currentPlayingCard = null;
+        let hasUserInteracted = false;
 
-        // Optional: Add scroll animation or smooth scroll behavior
-        if (newsFeed) {
-            newsFeed.style.scrollBehavior = 'smooth';
+        // Enhanced TikTok-style Audio Autoplay System
+        let autoplayObserver = null;
+        window.autoplayObserver = null;
 
-            // Add IntersectionObserver to detect which article is in view
-            const observer = new IntersectionObserver((entries) => {
+        function initializeAutoplaySystem() {
+            // Enhanced IntersectionObserver with better threshold detection
+            autoplayObserver = new IntersectionObserver((entries) => {
+                let mostVisibleEntry = null;
+                let maxRatio = 0;
+
+                // Find the most visible article card with enhanced detection
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        // Add class to currently visible article
-                        entry.target.classList.add('active');
+                    if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+                        maxRatio = entry.intersectionRatio;
+                        mostVisibleEntry = entry;
+                    }
+                });
+
+                // Handle audio playback and visual effects
+                entries.forEach(entry => {
+                    const card = entry.target;
+                    const audio = card.querySelector('.article-audio');
+
+                    if (entry.target === mostVisibleEntry?.target && entry.intersectionRatio > 0.7) {
+                        // Enhanced active card effects
+                        card.classList.add('active');
+
+                        // Add entrance animation
+                        card.style.animation = 'slide-up-fade 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                        if (audio && hasUserInteracted && isUnmuted) {
+                            playAudioForCard(card, audio);
+                        }
+
+                        // Enhanced device-specific effects
+                        if (window.innerWidth >= 1024) {
+                            // Desktop: Add parallax effect
+                            card.style.transform = 'perspective(1000px) rotateX(2deg)';
+                        } else if (window.innerWidth >= 768) {
+                            // Tablet: Subtle scale effect
+                            card.style.transform = 'scale(1.02)';
+                        }
                     } else {
-                        // Remove class from articles not in view
-                        entry.target.classList.remove('active');
+                        // Remove active state with smooth transition
+                        card.classList.remove('active');
+
+                        if (audio && audio === currentPlayingAudio) {
+                            pauseCurrentAudio();
+                        }
                     }
                 });
             }, {
-                threshold: 0.7 // 70% of the element must be visible
+                threshold: [0, 0.25, 0.5, 0.7, 0.85, 1.0],
+                rootMargin: '-10% 0px -10% 0px' // Better detection zone
             });
+
+            // Make observer globally accessible for infinite scroll
+            window.autoplayObserver = autoplayObserver;
 
             // Observe all article cards
             document.querySelectorAll('.article-card').forEach(card => {
-                observer.observe(card);
+                autoplayObserver.observe(card);
             });
+        }
+
+        function playAudioForCard(card, audio) {
+            // Stop current audio with fade effect
+            if (currentPlayingAudio && currentPlayingAudio !== audio) {
+                pauseCurrentAudio();
+            }
+
+            // Start new audio with enhanced effects
+            if (audio && audio.readyState >= 2) {
+                currentPlayingAudio = audio;
+                currentPlayingCard = card;
+
+                audio.currentTime = 0;
+                audio.muted = !isUnmuted;
+
+                audio.play().then(() => {
+                    card.classList.add('audio-playing');
+                }).catch(error => {
+                    console.warn('Audio autoplay failed:', error);
+                });
+            } else if (audio) {
+                audio.load();
+                audio.addEventListener('canplay', () => {
+                    if (card.classList.contains('active')) {
+                        playAudioForCard(card, audio);
+                    }
+                }, { once: true });
+            }
+        }
+
+        function pauseCurrentAudio() {
+            if (currentPlayingAudio) {
+                currentPlayingAudio.pause();
+                currentPlayingAudio.currentTime = 0;
+            }
+            if (currentPlayingCard) {
+                currentPlayingCard.classList.remove('audio-playing');
+            }
+            currentPlayingAudio = null;
+            currentPlayingCard = null;
+        }
+
+        // Enhanced Global Unmute Button functionality
+        globalUnmuteBtn.addEventListener('click', function () {
+            // Unmute all audio elements with smooth transition
+            document.querySelectorAll('audio').forEach(audio => {
+                audio.muted = false;
+            });
+
+            // Enhanced button transformation
+            this.textContent = '🔈';
+            this.style.background = 'var(--mint-gradient)';
+            this.style.animation = 'gentle-pulse 0.6s ease-out';
+
+            isUnmuted = true;
+            hasUserInteracted = true;
+
+            // Hide button with smooth fade out
+            setTimeout(() => {
+                this.style.opacity = '0';
+                this.style.transform = 'translateY(10px) scale(0.8)';
+                setTimeout(() => {
+                    this.style.display = 'none';
+                }, 300);
+            }, 1200);
+
+            // Start playing active card audio
+            const activeCard = document.querySelector('.article-card.active');
+            if (activeCard) {
+                const audio = activeCard.querySelector('.article-audio');
+                if (audio) {
+                    playAudioForCard(activeCard, audio);
+                }
+            }
+        });
+
+        // Enhanced scroll interaction detection with smooth animation
+        let scrollTimeout;
+        newsFeed.addEventListener('scroll', () => {
+            if (!hasUserInteracted && !isUnmuted) {
+                hasUserInteracted = true;
+                globalUnmuteBtn.style.display = 'block';
+                globalUnmuteBtn.style.animation = 'slide-up-fade 0.5s ease-out';
+            }
+
+            // Smooth scroll end detection
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                // Additional scroll end effects can be added here
+            }, 150);
+        }, { passive: true });
+
+        // Enhanced smooth scrolling
+        if (newsFeed) {
+            newsFeed.style.scrollBehavior = 'smooth';
+            newsFeed.scrollTop = 0;
+        }
+
+        // Initialize the enhanced autoplay system
+        initializeAutoplaySystem();
+
+        // Enhanced dynamic content observation
+        function observeNewCards() {
+            document.querySelectorAll('.article-card:not([data-observed])').forEach(card => {
+                card.setAttribute('data-observed', 'true');
+                card.classList.add('animate-fade-in');
+
+                if (window.autoplayObserver) {
+                    window.autoplayObserver.observe(card);
+                }
+            });
+        }
+
+        // Optimized observation interval
+        setInterval(observeNewCards, 1000);
+
+        // Enhanced keyboard navigation with smooth animations
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'Space') {
+                e.preventDefault();
+                const cards = document.querySelectorAll('.article-card');
+                const activeCard = document.querySelector('.article-card.active');
+                const currentIndex = Array.from(cards).indexOf(activeCard);
+
+                if (currentIndex < cards.length - 1) {
+                    cards[currentIndex + 1].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const cards = document.querySelectorAll('.article-card');
+                const activeCard = document.querySelector('.article-card.active');
+                const currentIndex = Array.from(cards).indexOf(activeCard);
+
+                if (currentIndex > 0) {
+                    cards[currentIndex - 1].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+
+        // Enhanced touch interactions for mobile
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        newsFeed.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        newsFeed.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchStartY - touchEndY;
+
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (!hasUserInteracted) {
+                    hasUserInteracted = true;
+                    if (globalUnmuteBtn && !isUnmuted) {
+                        globalUnmuteBtn.style.display = 'block';
+                        globalUnmuteBtn.style.animation = 'slide-up-fade 0.5s ease-out';
+                    }
+                }
+            }
+        }
+
+        // Engagement interactions
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.stat-item')) {
+                const statItem = e.target.closest('.stat-item');
+                const icon = statItem.querySelector('.stat-icon');
+                const count = statItem.querySelector('.stat-count');
+
+                // Animate interaction
+                statItem.style.animation = 'gentle-pulse 0.4s ease-out';
+
+                // Update count (simulate real interaction)
+                if (icon.textContent === '❤️') {
+                    const currentCount = parseInt(count.textContent);
+                    count.textContent = currentCount + 1;
+                    icon.style.animation = 'gentle-pulse 0.6s ease-out';
+                }
+
+                setTimeout(() => {
+                    statItem.style.animation = '';
+                    icon.style.animation = '';
+                }, 600);
+            }
+        });
+    });
+
+    // Enhanced share functionality
+    function shareArticle(title, url) {
+        if (navigator.share) {
+            navigator.share({
+                title: title,
+                url: url,
+                text: `Check out this news: ${title}`
+            }).catch(err => console.log('Error sharing:', err));
+        } else {
+            // Fallback for browsers without Web Share API
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+        }
+    }
+
+    // Enhanced infinite scroll for new articles
+    document.addEventListener('DOMContentLoaded', () => {
+        const newsFeed = document.querySelector('.news-feed');
+        let page = 2;
+        let isLoading = false;
+        let hasNext = true;
+
+        newsFeed.addEventListener('scroll', () => {
+            // Trigger loading earlier for smoother experience (when 3 viewport heights from bottom)
+            const nearBottom = newsFeed.scrollTop + newsFeed.clientHeight >= newsFeed.scrollHeight - (window.innerHeight * 3);
+            if (hasNext && !isLoading && nearBottom) {
+                loadMoreArticles();
+            }
+        });
+
+        async function loadMoreArticles() {
+            isLoading = true;
+
+            try {
+                const resp = await fetch(`/api/articles/?page=${page}`);
+                if (!resp.ok) throw new Error(`Bad status ${resp.status}`);
+                const data = await resp.json();
+
+                // Enhanced article card creation with new layout
+                for (const article of data.articles) {
+                    const card = document.createElement('article');
+                    card.className = 'article-card animate-fade-in';
+                    card.innerHTML = `
+                        <!-- Image Section - 70% of screen -->
+                        <div class="image-section">
+                            ${article.image_url
+                            ? `<!-- Blurred Background -->
+                                   <div class="blur-background" style="background-image: url('${article.image_url}');"></div>
+                                   
+                                   <!-- Main Image Container -->
+                                   <div class="main-image-container">
+                                       <img src="${article.image_url}" 
+                                            class="article-img" 
+                                            alt="${article.title}" 
+                                            loading="lazy"
+                                            decoding="async">
+                                   </div>`
+                            : `<div class="no-image-placeholder">
+                                       <div class="no-image-content">
+                                           <h3>${article.source__name}</h3>
+                                           <p>📰 Breaking News</p>
+                                       </div>
+                                   </div>`
+                        }
+
+                            <!-- Audio Indicator -->
+                            <div class="audio-indicator">🎵 Playing</div>
+
+                            ${article.summary_audio_url ? `
+                                <audio class="article-audio" 
+                                       src="${article.summary_audio_url}" 
+                                       preload="none" 
+                                       muted
+                                       data-article-id="${article.id}">
+                                </audio>` : ''}
+                        </div>
+
+                        <!-- Content Section - 30% of screen -->
+                        <div class="content-section">
+                            <!-- Top Row - Engagement Stats -->
+                            <div class="engagement-row">
+                                <div class="engagement-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-icon">❤️</span>
+                                        <span class="stat-count">${article.id + 127}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon">💬</span>
+                                        <span class="stat-count">${article.id + 23}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon">👁️</span>
+                                        <span class="stat-count">${article.id + 456}K</span>
+                                    </div>
+                                </div>
+
+                                <div class="quick-actions">
+                                    <button class="action-btn" onclick="shareArticle('${article.title}', '${article.original_url}')" title="Share">
+                                        📤
+                                    </button>
+                                    <button class="action-btn" title="Save">
+                                        🔖
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Middle Row - Article Content -->
+                            <div class="article-content-row">
+                                <h2 class="article-title">${article.title}</h2>
+                                
+                                ${article.summary ? `
+                                    <p class="article-summary">
+                                        ${article.summary.slice(0, 300)}...
+                                    </p>
+                                ` : ''}
+                            </div>
+
+                            <!-- Bottom Row - Source & Author Info -->
+                            <div class="source-row">
+                                <div class="source-info">
+                                    <span class="source-name">${article.source__name}</span>
+                                    <span class="publish-time">${new Date(article.publication_date).toLocaleString('vi-VN')}</span>
+                                </div>
+                                <span class="category-badge">${article.category__name}</span>
+                            </div>
+                        </div>
+                    `;
+
+                    newsFeed.appendChild(card);
+
+                    // Enhanced observation for new cards
+                    if (window.autoplayObserver) {
+                        window.autoplayObserver.observe(card);
+                    }
+                }
+
+                page++;
+                hasNext = Boolean(data.has_next);
+            } catch (e) {
+                console.error('Infinite scroll fetch failed:', e);
+                hasNext = false;
+            } finally {
+                isLoading = false;
+            }
         }
     });
 </script>

@@ -10,6 +10,7 @@ import logging
 
 from news_app.models import Article, Category, Source
 from news_app.crawler_config import CRAWLER_CONFIGS
+from news_app.tasks import classify_article_task
 
 logger = logging.getLogger('crawler')
 
@@ -48,14 +49,10 @@ class Command(BaseCommand):
 
         logger.info(f'Bắt đầu crawl tuoitre chuyên mục "{category_slug}" (slug thực tế: {category_path}) với giới hạn {limit} bài...')
 
-        # Ensure Source and Category exist
+        # Ensure Source exists
         source_obj, _ = Source.objects.get_or_create(name="Tuổi Trẻ", defaults={'base_url': base_url})
         
-        try:
-            category_obj = Category.objects.get(slug=category_slug)
-        except Category.DoesNotExist:
-            logger.error(f'Category với slug="{category_slug}" không tồn tại trong database.')
-            return
+        # Remove manual category lookup - will use AI prediction instead
 
         session = requests.Session()
         session.headers.update({
@@ -179,20 +176,29 @@ class Command(BaseCommand):
                 logger.warning(f'Bài báo đã tồn tại (hash): {url}')
                 continue
 
+
             try:
-                Article.objects.create(
-                    title=title,
+                article, created = Article.objects.update_or_create(
                     original_url=url,
-                    content_hash=content_hash,
-                    cleaned_content=content_text,
-                    summary='',
-                    image_url=img_url,
-                    publication_date=publication_date,
-                    category=category_obj,
-                    source=source_obj
+                    defaults={
+                        'title': title,
+                        'publication_date': publication_date,
+                        'cleaned_content': content_text,
+                        'content_hash': content_hash,
+                        'image_url': img_url,
+                        'source': source_obj,
+                        'category': None,  # IMPORTANT: leave None; classification is async
+                    }
                 )
-                created_count += 1
-                logger.info(f'Đã lưu bài báo: {title}')
+                if created:
+                    created_count += 1
+                    logger.info(f"CREATED: {title}")
+                else:
+                    logger.info(f"UPDATED: {title}")
+                
+                # Dispatch the main async pipeline (classify -> then summarize via chaining)
+                classify_article_task.delay(article.id)
+                logger.info(f'✅ Dispatched main processing task for Article ID {article.id}.')
                 
             except Exception as e:
                 logger.error(f'Lỗi khi lưu bài báo {url}: {e}', exc_info=True)
