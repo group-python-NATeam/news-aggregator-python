@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -12,12 +13,23 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-dev')
+# Lấy SECRET_KEY từ biến môi trường
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-default-dev-key-replace-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# Lấy DEBUG từ biến môi trường (mặc định là False)
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = []
+# Cấu hình ALLOWED_HOSTS từ biến môi trường
+# Render sẽ tự động cung cấp giá trị cho RENDER_EXTERNAL_HOSTNAME
+RENDER_APP_NAME = os.environ.get('RENDER_APP_NAME')
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+]
+
+if RENDER_APP_NAME:
+    ALLOWED_HOSTS.append(f"{RENDER_APP_NAME}.onrender.com")
 
 
 # Application definition
@@ -35,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # <-- THÊM DÒNG NÀY
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -64,14 +77,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'news_agg_project.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+# Cấu hình Database
+# Render sẽ tự động cung cấp biến môi trường DATABASE_URL
+# Nếu không có (ví dụ: khi chạy local), nó sẽ fallback về SQLite
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600 # Giữ kết nối 600 giây để tăng hiệu năng
+    )
 }
 
 
@@ -110,10 +123,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Thư mục mà 'collectstatic' sẽ gom tất cả file tĩnh vào
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Chỉ định thư mục chứa file tĩnh ở local dev (nơi bạn để file css)
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Cấu hình storage cho WhiteNoise để nén file và tạo cache
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --- MEDIA FILES ---
 MEDIA_URL = '/media/'
