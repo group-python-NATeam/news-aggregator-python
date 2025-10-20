@@ -13,6 +13,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # FIX: Thêm lfs: true để tải các file model AI (Git LFS)
+          lfs: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,9 +28,8 @@ jobs:
 
       - name: Run Crawlers
         env:
-          # Sử dụng secret đã set ở bước trước
+          # Sử dụng secret đã set
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          # Thêm OPENAI_API_KEY để crawler chạy tóm tắt
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           # Chạy 4 crawlers, mỗi cái lấy 20 bài
@@ -35,5 +37,3 @@ jobs:
           python manage.py crawl_dantri cong-nghe --limit=20
           python manage.py crawl_tuoitre cong-nghe --limit=20
           python manage.py crawl_thanhnien cong-nghe --limit=20
-
-          # (Tạm thời chỉ chạy 1 category, sau này ông có thể thêm các categories khác)
