@@ -21,15 +21,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-default-dev-key-
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # Cấu hình ALLOWED_HOSTS từ biến môi trường
-# Render sẽ tự động cung cấp giá trị cho RENDER_EXTERNAL_HOSTNAME
-RENDER_APP_NAME = os.environ.get('RENDER_APP_NAME')
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-]
+ALLOWED_HOSTS = ['news-agg-app.onrender.com', 'localhost', '127.0.0.1']
 
-if RENDER_APP_NAME:
-    ALLOWED_HOSTS.append(f"{RENDER_APP_NAME}.onrender.com")
+# (Nếu ông dùng Biến Môi trường RENDER_APP_NAME đã set ở image_30f9de.png)
+# Cách xịn hơn:
+# ALLOWED_HOSTS = [
+#     os.environ.get('RENDER_APP_NAME', 'localhost') + '.onrender.com',
+#     'localhost',
+#     '127.0.0.1',
+# ]
 
 
 # Application definition
