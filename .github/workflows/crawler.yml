@@ -1,0 +1,39 @@
+name: Scheduled Crawlers
+
+on:
+  schedule:
+    # Chạy mỗi 3 giờ (vào phút thứ 0 của giờ thứ 3)
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+    # Thêm nút "Run workflow" để chạy bằng tay trên GitHub Actions tab
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Crawlers
+        env:
+          # Sử dụng secret đã set ở bước trước
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # Thêm OPENAI_API_KEY để crawler chạy tóm tắt
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          # Chạy 4 crawlers, mỗi cái lấy 20 bài
+          python manage.py crawl_vnexpress cong-nghe --limit=20
+          python manage.py crawl_dantri cong-nghe --limit=20
+          python manage.py crawl_tuoitre cong-nghe --limit=20
+          python manage.py crawl_thanhnien cong-nghe --limit=20
+
+          # (Tạm thời chỉ chạy 1 category, sau này ông có thể thêm các categories khác)
