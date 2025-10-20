@@ -18,5 +18,9 @@ evaluate
 requests
 beautifulsoup4
 
-# --- Text-to-Speech ---
+# --- Text-to-Speech ---                                                                                                                     
 gTTS
+
+# --- Task Queue (Celery) ---
+celery
+redis
