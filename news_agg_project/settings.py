@@ -78,12 +78,10 @@ WSGI_APPLICATION = 'news_agg_project.wsgi.application'
 
 
 # Cấu hình Database
-# Render sẽ tự động cung cấp biến môi trường DATABASE_URL
-# Nếu không có (ví dụ: khi chạy local), nó sẽ fallback về SQLite
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600 # Giữ kết nối 600 giây để tăng hiệu năng
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600
     )
 }
 
@@ -186,3 +184,26 @@ CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', 'redis://localho
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# ==============================================================================
+# 💡 PRODUCTION LOGGING CONFIGURATION
+# ==============================================================================
+#
+# Khi DEBUG=False (chạy trên production), chúng ta KHÔNG ghi ra file nữa.
+# Thay vào đó, chúng ta bắt tất cả log phải đi ra 'console'.
+# Nền tảng Render sẽ tự động bắt (capture) luồng console này.
+
+if not DEBUG:
+    # 1. Vô hiệu hóa 'file' handler bằng cách xóa nó
+    if 'file' in LOGGING['handlers']:
+        del LOGGING['handlers']['file']
+
+    # 2. Bắt tất cả 'loggers' chỉ sử dụng 'console'
+    for logger_config in LOGGING['loggers'].values():
+        if 'file' in logger_config.get('handlers', []):
+            # Loại bỏ 'file' ra khỏi danh sách handlers
+            logger_config['handlers'] = [h for h in logger_config['handlers'] if h != 'file']
+
+            # Đảm bảo 'console' vẫn còn đó (nếu nó chưa có)
+            if 'console' not in logger_config['handlers']:
+                logger_config['handlers'].append('console')
