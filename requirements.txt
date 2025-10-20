@@ -1,8 +1,11 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # --- Core Django & Server ---
 django
 gunicorn
 dj-database-url
 whitenoise
+python-dotenv
 
 # --- AI & Data Processing ---
 torch==2.8.0
