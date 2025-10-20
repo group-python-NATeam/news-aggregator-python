@@ -225,3 +225,6 @@ venv/
 .vscode/
 .idea/news_app/ml_models/my-finetuned-phobert/model.safetensors
 news_app/ml_models/my-finetuned-phobert/model.safetensors
+
+# Bỏ qua các file model AI/ML
+news_app/ml_models/
