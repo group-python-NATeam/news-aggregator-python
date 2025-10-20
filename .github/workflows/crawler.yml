@@ -11,8 +11,14 @@ jobs:
   crawl:
     runs-on: ubuntu-latest
     steps:
+      - name: Install Git LFS
+        run: |
+          sudo apt-get update
+          sudo apt-get install git-lfs -y
+          git lfs install
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@vv4
         with:
           # FIX: Thêm lfs: true để tải các file model AI (Git LFS)
           lfs: true
